@@ -64,12 +64,12 @@ module DiasporaFederation
 
       
       # @!attribute [r] carto_latitude
-      #   @return [Float] Latitude
-      property :carto_latitude, :float, optional: true
+      #   @return [String] Latitude, will be casted back to a float in app
+      property :carto_latitude, :string, optional: true
       
       # @!attribute [r] carto_longitude
-      #   @return [Float] Longitude
-      property :carto_longitude, :float, optional: true
+      #   @return [String] Longitude, will be casted back to a float in app
+      property :carto_longitude, :string, optional: true
       
       # @!attribute [r] carto_etablissement
       #   @return [String] Etablissement
