@@ -62,6 +62,35 @@ module DiasporaFederation
       property :gender, :string, optional: true
       property :location, :string, optional: true
 
+      
+      # @!attribute [r] carto_latitude
+      #   @return [Float] Latitude
+      property :carto_latitude, :float, optional: true
+      
+      # @!attribute [r] carto_longitude
+      #   @return [Float] Longitude
+      property :carto_longitude, :float, optional: true
+      
+      # @!attribute [r] carto_etablissement
+      #   @return [String] Etablissement
+      property :carto_etablissement, :string, optional: true
+      
+      # @!attribute [r] carto_user_type
+      #   @return [String] User_type
+      property :carto_user_type, :string, optional: true
+      
+      # @!attribute [r] carto_technics
+      #   @return [Integer] Number of technics
+      property :carto_technics, :integer, optional: true
+      
+      # @!attribute [r] carto_activites
+      #   @return [Integer] Number of tctivites
+      property :carto_activites, :integer, optional: true
+      
+      # @!attribute [r] carto_methods
+      #   @return [Integer] Number of tethods
+      property :carto_methods,  :integer, optional: true
+
       # @!attribute [r] searchable
       #   @see Discovery::HCard#searchable
       #   @return [Boolean] searchable flag
