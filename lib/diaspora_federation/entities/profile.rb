@@ -63,6 +63,10 @@ module DiasporaFederation
       property :location, :string, optional: true
 
       
+      # @!attribute [r] carto_id
+      #   @return [String] ID in cartotalent's system
+      property :carto_latitude, :string, optional: true
+      
       # @!attribute [r] carto_latitude
       #   @return [String] Latitude, will be casted back to a float in app
       property :carto_latitude, :string, optional: true
@@ -80,16 +84,16 @@ module DiasporaFederation
       property :carto_user_type, :string, optional: true
       
       # @!attribute [r] carto_technics
-      #   @return [Integer] Number of technics
-      property :carto_technics, :integer, optional: true
+      #   @return [String] Number of technics
+      property :carto_technics, :string, optional: true
       
       # @!attribute [r] carto_activites
-      #   @return [Integer] Number of tctivites
-      property :carto_activites, :integer, optional: true
+      #   @return [String] Number of tctivites
+      property :carto_activites, :string, optional: true
       
       # @!attribute [r] carto_methods
-      #   @return [Integer] Number of tethods
-      property :carto_methods,  :integer, optional: true
+      #   @return [String] Number of tethods
+      property :carto_methods,  :string, optional: true
 
       # @!attribute [r] searchable
       #   @see Discovery::HCard#searchable
