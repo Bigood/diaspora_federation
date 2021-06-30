@@ -89,7 +89,7 @@ module DiasporaFederation
       
       # @!attribute [r] carto_activites
       #   @return [String] Number of activites
-      property :carto_activites, :string, optipoonal: true
+      property :carto_activites, :string, optional: true
       
       # @!attribute [r] carto_methods
       #   @return [String] Number of methods
