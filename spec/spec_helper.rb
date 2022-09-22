@@ -19,7 +19,7 @@ dummy_app_path = File.join(File.dirname(__FILE__), "..", "test", "dummy")
 begin
   require "rails" # try to load rails
 rescue LoadError
-  Dir["#{File.join(dummy_app_path, 'app', 'models')}/*.rb"].each {|f| require f }
+  Dir["#{File.join(dummy_app_path, 'app', 'models')}/*.rb"].sort.each {|f| require f }
   require File.join(dummy_app_path, "config", "initializers", "diaspora_federation")
 else
   ENV["RAILS_ENV"] ||= "test"
@@ -29,7 +29,6 @@ else
 end
 
 # test helpers
-require "json-schema-rspec"
 require "rspec/collection_matchers"
 require "rspec/json_expectations"
 require "webmock/rspec"
@@ -42,19 +41,20 @@ require "entities"
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each {|f| require f }
 
 RSpec.configure do |config|
-  config.include JSON::SchemaMatchers
-  config.json_schemas[:entity_schema] = "lib/diaspora_federation/schemas/federation_entities.json"
-
   config.example_status_persistence_file_path = "spec/rspec-persistence.txt"
 
   config.expect_with :rspec do |expect_config|
     expect_config.syntax = :expect
   end
 
-  unless defined?(::Rails)
+  if defined?(::Rails)
+    config.before(:each, type: :controller) do
+      ActionController::Base.allow_forgery_protection = true
+    end
+  else
     config.exclude_pattern = "**/controllers/**/*_spec.rb, **/routing/**/*_spec.rb"
     config.filter_run_excluding rails: true
   end

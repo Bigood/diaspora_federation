@@ -61,7 +61,7 @@ module DiasporaFederation
         expect(entity.test1).to be_nil
       end
 
-      context "validation" do
+      context "when validating" do
         let(:invalid_data) { {test1: "as;df", test2: nil, test3: "no boolean"} }
 
         it "validates the entity and raise an error with failed properties if not valid" do
@@ -117,9 +117,9 @@ module DiasporaFederation
       it "returns a hash of the internal data" do
         entity = Entities::TestDefaultEntity.new(data)
         expect(entity.to_h).to eq(
-          data.map {|key, value|
+          data.to_h {|key, value|
             [key, entity.class.class_props[key] == :string ? value.to_s : value]
-          }.to_h
+          }
         )
       end
     end
@@ -526,15 +526,6 @@ module DiasporaFederation
         expect(entity.asdf).to eq("FDSA")
         expect(entity.test).to be_nil
         expect(entity.multi).to be_empty
-      end
-    end
-
-    context "xml_name" do
-      let(:hash) { {test: "test", qwer: "qwer"} }
-
-      it "should not use the xml_name for the #to_h" do
-        entity = Entities::TestEntityWithXmlName.new(hash)
-        expect(entity.to_h).to eq(hash)
       end
     end
   end

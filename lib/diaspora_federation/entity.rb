@@ -17,7 +17,6 @@ module DiasporaFederation
   #     property :prop
   #     property :optional, default: false
   #     property :dynamic_default, default: -> { Time.now }
-  #     property :another_prop, xml_name: :another_name
   #     entity :nested, NestedEntity
   #     entity :multiple, [OtherEntity]
   #   end
@@ -78,7 +77,7 @@ module DiasporaFederation
     # Nested entities are also converted to a Hash.
     # @return [Hash] entity data (mostly equal to the hash used for initialization).
     def to_h
-      enriched_properties.map {|key, value|
+      enriched_properties.to_h {|key, value|
         type = self.class.class_props[key]
 
         if type.instance_of?(Symbol) || value.nil?
@@ -88,7 +87,7 @@ module DiasporaFederation
         elsif type.instance_of?(Array)
           [key, value.map(&:to_h)]
         end
-      }.to_h
+      }
     end
 
     # Returns the XML representation for this entity constructed out of
@@ -98,7 +97,7 @@ module DiasporaFederation
     #
     # @return [Nokogiri::XML::Element] root element containing properties as child elements
     def to_xml
-      doc = Nokogiri::XML::DocumentFragment.new(Nokogiri::XML::Document.new)
+      doc = Nokogiri::XML::Document.new
       Nokogiri::XML::Element.new(self.class.entity_name, doc).tap do |root_element|
         xml_elements.each do |name, value|
           add_property_to_xml(doc, root_element, name, value)
@@ -216,7 +215,7 @@ module DiasporaFederation
     end
 
     def setable_property?(type, val)
-      setable_string?(type, val) || type == :timestamp && val.is_a?(Time)
+      setable_string?(type, val) || (type == :timestamp && val.is_a?(Time))
     end
 
     def setable_string?(type, val)
@@ -274,7 +273,7 @@ module DiasporaFederation
     end
 
     def normalized_properties
-      properties.map {|name, value| [name, normalize_property(name, value)] }.to_h
+      properties.to_h {|name, value| [name, normalize_property(name, value)] }
     end
 
     def normalize_property(name, value)
@@ -322,7 +321,7 @@ module DiasporaFederation
     # Generates a hash with entity properties which is put to the "entity_data"
     # field of a JSON serialized object.
     # @return [Hash] object properties in JSON format
-    def json_data
+    def json_data # rubocop:disable Metrics/PerceivedComplexity
       enriched_properties.map {|key, value|
         type = self.class.class_props[key]
         next if optional_nil_value?(key, value)
@@ -331,7 +330,7 @@ module DiasporaFederation
           entity_data = value.to_json
           [key, entity_data] unless entity_data.nil?
         elsif type.instance_of?(Array)
-          entity_data = value.nil? ? nil : value.map(&:to_json)
+          entity_data = value&.map(&:to_json)
           [key, entity_data] unless entity_data.nil?
         else
           [key, value]

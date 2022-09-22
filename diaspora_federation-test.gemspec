@@ -13,15 +13,18 @@ Gem::Specification.new do |s|
   s.email       = ["benjamin@coding4.coffee"]
   s.homepage    = "https://github.com/diaspora/diaspora_federation"
   s.summary     = "diaspora* federation test utils"
-  s.description = "This gem provides some supplimentary code (factory definitions), that"\
+  s.description = "This gem provides some supplimentary code (factory definitions), that" \
                   "helps to build tests for users of the diaspora_federation gem."
   s.license     = "AGPL-3.0"
+  s.metadata    = {
+    "rubygems_mfa_required" => "true"
+  }
 
-  s.files       = Dir["lib/diaspora_federation/test.rb", "lib/diaspora_federation/test/*"]
+  s.files = Dir["lib/diaspora_federation/test.rb", "lib/diaspora_federation/test/*"]
 
-  s.required_ruby_version = "~> 2.5"
+  s.required_ruby_version = ">= 2.7"
 
   s.add_dependency "diaspora_federation", DiasporaFederation::VERSION
-  s.add_dependency "fabrication", "~> 2.16"
+  s.add_dependency "fabrication", "~> 2.29"
   s.add_dependency "uuid", "~> 2.3", ">= 2.3.8"
 end

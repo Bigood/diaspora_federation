@@ -33,34 +33,6 @@ module DiasporaFederation
         end
       end
 
-      it "uses xml_name for parsing" do
-        xml = <<~XML.strip
-          <test_entity_with_xml_name>
-            <test>asdf</test>
-            <asdf>qwer</asdf>
-          </test_entity_with_xml_name>
-        XML
-
-        parsed = Parsers::XmlParser.new(Entities::TestEntityWithXmlName).parse(Nokogiri::XML(xml).root)
-
-        expect(parsed[0][:test]).to eq("asdf")
-        expect(parsed[0][:qwer]).to eq("qwer")
-      end
-
-      it "allows name for parsing even when property has a xml_name" do
-        xml = <<~XML.strip
-          <test_entity_with_xml_name>
-            <test>asdf</test>
-            <qwer>qwer</qwer>
-          </test_entity_with_xml_name>
-        XML
-
-        parsed = Parsers::XmlParser.new(Entities::TestEntityWithXmlName).parse(Nokogiri::XML(xml).root)
-
-        expect(parsed[0][:test]).to eq("asdf")
-        expect(parsed[0][:qwer]).to eq("qwer")
-      end
-
       it "parses the string to the correct type" do
         xml = <<~XML.strip
           <test_default_entity>
@@ -150,6 +122,14 @@ module DiasporaFederation
           expect(parsed[0][:multi]).to have(2).items
           expect(parsed[0][:multi].first.to_h).to eq(child_entity2.to_h)
           expect(parsed[0][:asdf]).to eq("QWERT")
+        end
+
+        it "parses array entities only once" do
+          expect(Entities::OtherEntity).to receive(:from_xml).twice.and_call_original
+
+          parsed = Parsers::XmlParser.new(Entities::TestNestedEntity).parse(nested_payload)
+
+          expect(parsed[0][:multi]).to have(2).items
         end
       end
 

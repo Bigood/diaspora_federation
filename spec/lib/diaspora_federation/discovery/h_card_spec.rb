@@ -12,7 +12,6 @@ module DiasporaFederation
         guid:             person.guid,
         nickname:         person.nickname,
         full_name:        person.full_name,
-        url:              person.url,
         photo_large_url:  photo_large_url,
         photo_medium_url: photo_medium_url,
         photo_small_url:  photo_small_url,
@@ -25,10 +24,9 @@ module DiasporaFederation
 
     let(:html) { <<~HTML }
       <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-      <html xmlns="http://www.w3.org/1999/xhtml">
+      <html>
         <head>
-          <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-          <meta charset="UTF-8" />
+          <meta charset="UTF-8"/>
           <title>#{person.full_name}</title>
         </head>
         <body>
@@ -78,28 +76,22 @@ module DiasporaFederation
                   <span class="family_name">#{person.last_name}</span>
                 </dd>
               </dl>
-              <dl class="entity_url">
-                <dt>Url</dt>
-                <dd>
-                  <a id="pod_location" class="url" rel="me" href="#{person.url}">#{person.url}</a>
-                </dd>
-              </dl>
               <dl class="entity_photo">
                 <dt>Photo</dt>
                 <dd>
-                  <img class="photo avatar" width="300" height="300" src="#{photo_large_url}" />
+                  <img class="photo avatar" width="300" height="300" src="#{photo_large_url}"/>
                 </dd>
               </dl>
               <dl class="entity_photo_medium">
                 <dt>Photo_medium</dt>
                 <dd>
-                  <img class="photo avatar" width="100" height="100" src="#{photo_medium_url}" />
+                  <img class="photo avatar" width="100" height="100" src="#{photo_medium_url}"/>
                 </dd>
               </dl>
               <dl class="entity_photo_small">
                 <dt>Photo_small</dt>
                 <dd>
-                  <img class="photo avatar" width="50" height="50" src="#{photo_small_url}" />
+                  <img class="photo avatar" width="50" height="50" src="#{photo_small_url}"/>
                 </dd>
               </dl>
             </div>
@@ -112,14 +104,14 @@ module DiasporaFederation
 
     it_behaves_like "an Entity subclass"
 
-    context "generation" do
+    context "when generating" do
       it "creates an instance from a data hash" do
         hcard = Discovery::HCard.new(data)
         expect(hcard.to_html).to eq(html)
       end
     end
 
-    context "parsing" do
+    context "when parsing" do
       it "reads its own output" do
         hcard = Discovery::HCard.from_html(html)
         expect(hcard.guid).to eq(person.guid)
@@ -138,10 +130,9 @@ module DiasporaFederation
       it "reads minimal hCard" do
         minimal_html = <<~HTML
           <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-          <html xmlns="http://www.w3.org/1999/xhtml">
+          <html>
             <head>
-              <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-              <meta charset="UTF-8" />
+              <meta charset="UTF-8"/>
               <title>#{person.full_name}</title>
             </head>
             <body>
@@ -188,19 +179,19 @@ module DiasporaFederation
                   <dl class="entity_photo">
                     <dt>Photo</dt>
                     <dd>
-                      <img class="photo avatar" width="300" height="300" src="#{photo_large_url}" />
+                      <img class="photo avatar" width="300" height="300" src="#{photo_large_url}"/>
                     </dd>
                   </dl>
                   <dl class="entity_photo_medium">
                     <dt>Photo_medium</dt>
                     <dd>
-                      <img class="photo avatar" width="100" height="100" src="#{photo_medium_url}" />
+                      <img class="photo avatar" width="100" height="100" src="#{photo_medium_url}"/>
                     </dd>
                   </dl>
                   <dl class="entity_photo_small">
                     <dt>Photo_small</dt>
                     <dd>
-                      <img class="photo avatar" width="50" height="50" src="#{photo_small_url}" />
+                      <img class="photo avatar" width="50" height="50" src="#{photo_small_url}"/>
                     </dd>
                   </dl>
                 </div>
@@ -222,7 +213,6 @@ module DiasporaFederation
         expect(hcard.last_name).to eq(person.last_name)
 
         expect(hcard.nickname).to be_nil
-        expect(hcard.url).to be_nil
       end
 
       it "is frozen after parsing" do

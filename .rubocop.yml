@@ -1,7 +1,10 @@
-require: rubocop-rails
+require:
+  - rubocop-rails
+  - rubocop-rake
 
 AllCops:
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 2.7
+  NewCops: enable
   Exclude:
     - "bin/**/*"
     - "test/dummy/bin/**/*"
@@ -11,7 +14,7 @@ Rails:
   Enabled: true
 
 # Commonly used screens these days easily fit more than 80 characters.
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
 
 # Too short methods lead to extraction of single-use methods, which can make
@@ -46,7 +49,7 @@ Style/SymbolArray:
   Enabled: true
 
 # Most readable form.
-Layout/AlignHash:
+Layout/HashAlignment:
   EnforcedHashRocketStyle: table
   EnforcedColonStyle: table
 
@@ -95,7 +98,7 @@ Style/SignalException:
 # Suppressing exceptions can be perfectly fine, and be it to avoid to
 # explicitly type nil into the rescue since that's what you want to return,
 # or suppressing LoadError for optional dependencies
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Enabled: false
 
 Layout/SpaceInsideBlockBraces:
@@ -182,6 +185,19 @@ Rails/Present:
   Exclude:
     - "lib/**/*"
 
+# we don't have rails everywhere, so just disable these
+Rails/NegateInclude:
+  Enabled: false
+Rails/RakeEnvironment:
+  Enabled: false
+
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - "spec/**/*"
+
+Naming/InclusiveLanguage:
+  Enabled: false
+
 Style/SingleLineMethods:
   Exclude:
     - "test/dummy/app/models/*"
@@ -195,6 +211,10 @@ Style/NumericPredicate:
 Style/AccessModifierDeclarations:
   Exclude:
     - "lib/diaspora_federation/test/factories.rb"
+
+Style/HashAsLastArrayItem:
+  Exclude:
+    - "lib/diaspora_federation/validators/*"
 
 # disable this for now, needs to be rechecked later
 Style/DateTime:

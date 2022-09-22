@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "faraday"
-require "faraday_middleware/response/follow_redirects"
+require "faraday/follow_redirects"
 
 module DiasporaFederation
   # A wrapper for {https://github.com/lostisland/faraday Faraday}
@@ -32,7 +32,8 @@ module DiasporaFederation
       }
 
       @connection = Faraday::Connection.new(options) do |builder|
-        builder.use FaradayMiddleware::FollowRedirects, limit: DiasporaFederation.http_redirect_limit
+        builder.use Faraday::FollowRedirects::Middleware, limit: DiasporaFederation.http_redirect_limit
+
         builder.adapter Faraday.default_adapter
       end
 

@@ -13,9 +13,14 @@ Gem::Specification.new do |s|
   s.email       = ["benjamin@coding4.coffee", "senya@riseup.net"]
   s.homepage    = "https://github.com/diaspora/diaspora_federation"
   s.summary     = "diaspora* federation json schemas"
-  s.description = "This gem provides JSON schemas (currently one schema) for "\
+  s.description = "This gem provides JSON schemas (currently one schema) for " \
                   "validating JSON serialized federation objects."
   s.license     = "AGPL-3.0"
+  s.metadata    = {
+    "rubygems_mfa_required" => "true"
+  }
 
-  s.files       = Dir["lib/diaspora_federation/schemas.rb", "lib/diaspora_federation/schemas/*.json"]
+  s.files = Dir["lib/diaspora_federation/schemas.rb", "lib/diaspora_federation/schemas/*.json"]
+
+  s.required_ruby_version = ">= 2.7"
 end

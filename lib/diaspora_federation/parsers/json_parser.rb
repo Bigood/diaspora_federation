@@ -17,15 +17,15 @@ module DiasporaFederation
       private
 
       def parse_entity_data(entity_data)
-        hash = entity_data.map {|key, value|
-          property = entity_type.find_property_for_xml_name(key)
+        hash = entity_data.to_h {|key, value|
+          property = entity_type.class_props.keys.find {|name| name.to_s == key }
           if property
             type = entity_type.class_props[property]
             [property, parse_element_from_value(type, entity_data[key])]
           else
             [key, value]
           end
-        }.to_h
+        }
 
         [hash]
       end
@@ -49,9 +49,7 @@ module DiasporaFederation
       end
 
       def from_json_sanity_validation(json_hash)
-        missing = %w[entity_type entity_data].map {|prop|
-          prop if json_hash[prop].nil?
-        }.compact.join(", ")
+        missing = %w[entity_type entity_data].select {|prop| json_hash[prop].nil? }.join(", ")
         raise DeserializationError, "Required properties are missing in JSON object: #{missing}" unless missing.empty?
 
         assert_parsability_of(json_hash["entity_type"])

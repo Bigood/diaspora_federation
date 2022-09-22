@@ -9,14 +9,12 @@ module DiasporaFederation
       end
 
       def build_instance
-        self._instance = _klass.new(_attributes)
+        self._instance = resolved_class.new(_attributes)
       end
 
       def to_hash(attributes=[], _callbacks=[])
         process_attributes(attributes)
-        _attributes.each_with_object({}) do |(name, value), hash|
-          hash[name.to_sym] = value
-        end
+        _attributes.transform_keys(&:to_sym)
       end
     end
 

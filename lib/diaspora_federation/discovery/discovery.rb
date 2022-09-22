@@ -24,7 +24,7 @@ module DiasporaFederation
         validate_diaspora_id
 
         DiasporaFederation.callbacks.trigger(:save_person_after_webfinger, person)
-        logger.info "successfully webfingered #{diaspora_id}"
+        logger.info "Successfully webfingered #{diaspora_id}"
         person
       rescue DiscoveryError
         raise # simply re-raise DiscoveryError
@@ -38,15 +38,15 @@ module DiasporaFederation
         # Validates if the diaspora* ID matches the diaspora* ID in the webfinger response
         return if diaspora_id == clean_diaspora_id(webfinger.acct_uri)
 
-        raise DiscoveryError, "diaspora* ID does not match: Wanted #{diaspora_id} but got" \
-                              " #{clean_diaspora_id(webfinger.acct_uri)}"
+        raise DiscoveryError, "diaspora* ID does not match: Wanted #{diaspora_id} but got " \
+                              "#{clean_diaspora_id(webfinger.acct_uri)}"
       end
 
       def clean_diaspora_id(diaspora_id)
         diaspora_id.strip.sub("acct:", "").to_s.downcase
       end
 
-      def get(url, http_fallback=false)
+      def get(url, http_fallback: false)
         logger.info "Fetching #{url} for #{diaspora_id}"
         response = HttpClient.get(url)
         raise "Failed to fetch #{url}: #{response.status}" unless response.success?
@@ -67,22 +67,11 @@ module DiasporaFederation
         "acct:#{diaspora_id}"
       end
 
-      def legacy_webfinger_url_from_host_meta
-        # This tries the xrd url with https first, then falls back to http.
-        host_meta = HostMeta.from_xml(get("https://#{domain}/.well-known/host-meta", true))
-        host_meta.webfinger_template_url.gsub("{uri}", acct_parameter)
-      end
-
       def webfinger
-        return @webfinger if @webfinger
-
-        webfinger_url = "https://#{domain}/.well-known/webfinger?resource=#{acct_parameter}"
-
         # This tries the WebFinger URL with https first, then falls back to http if webfinger_http_fallback is enabled.
-        @webfinger = WebFinger.from_json(get(webfinger_url, DiasporaFederation.webfinger_http_fallback))
-      rescue => e # rubocop:disable Style/RescueStandardError
-        logger.warn "WebFinger failed, retrying with legacy WebFinger for #{diaspora_id}: #{e.class}: #{e.message}"
-        @webfinger = WebFinger.from_xml(get(legacy_webfinger_url_from_host_meta))
+        @webfinger ||=
+          WebFinger.from_json(get("https://#{domain}/.well-known/webfinger?resource=#{acct_parameter}",
+                                  http_fallback: DiasporaFederation.webfinger_http_fallback))
       end
 
       def hcard

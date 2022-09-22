@@ -16,6 +16,14 @@ module DiasporaFederation
       [data, type, enc, alg].map {|i| Base64.urlsafe_encode64(i) }.join(".")
     end
 
+    def encrypt_magic_env(magic_env)
+      DiasporaFederation::Salmon::AES.generate_key_and_iv.tap do |key|
+        magic_env.instance_variable_set(
+          "@payload_data", DiasporaFederation::Salmon::AES.encrypt(magic_env.send(:payload_data), key[:key], key[:iv])
+        )
+      end
+    end
+
     context "sanity" do
       it "constructs an instance" do
         expect {
@@ -78,7 +86,7 @@ module DiasporaFederation
         subj = sig_subj(env_xml)
         sig = Base64.urlsafe_decode64(env_xml.at_xpath("me:env/me:sig").content)
 
-        expect(privkey.public_key.verify(OpenSSL::Digest::SHA256.new, sig, subj)).to be_truthy
+        expect(privkey.public_key.verify(OpenSSL::Digest.new("SHA256"), sig, subj)).to be_truthy
       end
     end
 

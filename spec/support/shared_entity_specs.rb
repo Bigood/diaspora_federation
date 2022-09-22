@@ -1,18 +1,19 @@
 # frozen_string_literal: true
 
+require "json-schema"
+
 def entity_hash_from(hash)
-  hash.delete(:parent_author_signature)
-  hash.map {|key, value|
+  hash.transform_values {|value|
     if [String, TrueClass, FalseClass, Integer, NilClass].any? {|c| value.is_a? c }
-      [key, value]
+      value
     elsif value.is_a? Time
-      [key, value.iso8601]
+      value.iso8601
     elsif value.instance_of?(Array)
-      [key, value.map(&:to_h)]
+      value.map(&:to_h)
     else
-      [key, value.to_h]
+      value.to_h
     end
-  }.to_h
+  }
 end
 
 shared_examples "an Entity subclass" do
@@ -67,7 +68,7 @@ shared_examples "an XML Entity" do |ignored_props=[]|
   context "parsing" do
     it "reads its own output" do
       packed_xml = instance.to_xml
-      parsed_instance = DiasporaFederation::Salmon::XmlPayload.unpack(packed_xml)
+      parsed_instance = DiasporaFederation::Entity.entity_class(packed_xml.name).from_xml(packed_xml)
 
       check_entity(instance, parsed_instance, ignored_props)
     end
@@ -101,24 +102,19 @@ shared_examples "an XML Entity" do |ignored_props=[]|
 end
 
 shared_examples "a relayable Entity" do
-  let(:instance) { described_class.new(data.merge(author_signature: nil, parent_author_signature: nil)) }
+  let(:instance) { described_class.new(data.merge(author_signature: nil)) }
 
   context "signatures generation" do
     def verify_signature(pubkey, signature, signed_string)
-      pubkey.verify(OpenSSL::Digest::SHA256.new, Base64.decode64(signature), signed_string)
+      pubkey.verify(OpenSSL::Digest.new("SHA256"), Base64.decode64(signature), signed_string)
     end
 
-    it "computes correct signatures for the entity" do
-      order = described_class.class_props.keys - %i[author_signature parent_author_signature parent]
+    it "computes correct author_signature for the entity" do
+      order = described_class.class_props.keys - %i[author_signature parent]
       signed_string = order.map {|name| data[name].is_a?(Time) ? data[name].iso8601 : data[name] }.join(";")
 
-      xml = instance.to_xml
-
-      author_signature = xml.at_xpath("author_signature").text
-      parent_author_signature = xml.at_xpath("parent_author_signature").text
-
+      author_signature = instance.to_xml.at_xpath("author_signature").text
       expect(verify_signature(alice.public_key, author_signature, signed_string)).to be_truthy
-      expect(verify_signature(bob.public_key, parent_author_signature, signed_string)).to be_truthy
     end
   end
 end
@@ -127,7 +123,8 @@ shared_examples "a JSON Entity" do
   describe "#to_json" do
     it "#to_json output matches JSON schema" do
       json = described_class.new(data).to_json
-      expect(json.to_json).to match_json_schema(:entity_schema)
+      errors = JSON::Validator.fully_validate("lib/diaspora_federation/schemas/federation_entities.json", json.to_json)
+      expect(errors).to be_empty
     end
 
     let(:to_json_output) { described_class.new(data).to_json.to_json }
@@ -141,7 +138,7 @@ shared_examples "a JSON Entity" do
       entity_data.delete(:parent)
       nested_elements, simple_props = entity_data.partition {|_key, value| value.is_a?(Array) || value.is_a?(Hash) }
 
-      expect(to_json_output).to include_json(entity_data: simple_props.reject {|_key, value| value.nil? }.to_h)
+      expect(to_json_output).to include_json(entity_data: simple_props.to_h.compact)
 
       nested_elements.each {|key, value|
         type = described_class.class_props[key]
@@ -182,7 +179,7 @@ shared_examples "a relayable JSON entity" do
   it "matches JSON schema with empty string signatures" do
     json = described_class.new(data).to_json
     json[:entity_data][:author_signature] = ""
-    json[:entity_data][:parent_author_signature] = ""
-    expect(json.to_json).to match_json_schema(:entity_schema)
+    errors = JSON::Validator.fully_validate("lib/diaspora_federation/schemas/federation_entities.json", json.to_json)
+    expect(errors).to be_empty
   end
 end

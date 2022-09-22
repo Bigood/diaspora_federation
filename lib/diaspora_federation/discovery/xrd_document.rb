@@ -5,13 +5,9 @@ module DiasporaFederation
     # This class implements basic handling of XRD documents as far as it is
     # necessary in the context of the protocols used with diaspora* federation.
     #
-    # @note {http://tools.ietf.org/html/rfc6415 RFC 6415} recommends that servers
-    #   should also offer the JRD format in addition to the XRD representation.
-    #   Implementing +XrdDocument#to_json+ and +XrdDocument.json_data+ should
-    #   be almost trivial due to the simplicity of the format and the way the data
-    #   is stored internally already. See
-    #   {http://tools.ietf.org/html/rfc6415#appendix-A RFC 6415, Appendix A}
-    #   for a description of the JSON format.
+    # It also implements handling of the JRD format, see
+    # {https://datatracker.ietf.org/doc/html/rfc6415#appendix-A RFC 6415, Appendix A}
+    # for a description of the JSON format.
     #
     # @example Creating a XrdDocument
     #   doc = XrdDocument.new
@@ -89,7 +85,7 @@ module DiasporaFederation
           aliases:    (aliases if aliases.any?),
           properties: (properties if properties.any?),
           links:      (links if links.any?)
-        }.reject {|_, v| v.nil? }
+        }.compact
       end
 
       # Parse the XRD document from the given string and create a hash containing
@@ -132,7 +128,7 @@ module DiasporaFederation
           aliases:    json_hash["aliases"],
           properties: json_hash["properties"],
           links:      symbolize_keys_for_links(json_hash["links"])
-        }.reject {|_, v| v.nil? }
+        }.compact
       rescue JSON::JSONError => e
         raise InvalidDocument,
               "Not a JRD document: #{e.class}: #{e.message[0..255].encode(Encoding.default_external, undef: :replace)}"
@@ -140,8 +136,7 @@ module DiasporaFederation
 
       private
 
-      attr_reader :expires
-      attr_reader :subject
+      attr_reader :expires, :subject
 
       NS = {xrd: XMLNS}.freeze
 
@@ -208,7 +203,7 @@ module DiasporaFederation
 
       # symbolize link keys from JSON hash, but only convert known keys
       private_class_method def self.symbolize_keys_for_links(links)
-        links.map do |link|
+        links&.map do |link|
           {}.tap do |hash|
             LINK_ATTRS.each do |attr|
               hash[attr] = link[attr.to_s] if link.key?(attr.to_s)
